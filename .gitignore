@@ -1,0 +1,10 @@
+# Pythonの一時キャッシュを除外
+__pycache__/
+*.pyc
+
+# OS固有の隠しファイルを除外
+.DS_Store
+Thumbs.db
+
+# Streamlitのローカル設定を除外
+.streamlit/
