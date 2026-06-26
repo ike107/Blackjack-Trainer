@@ -41,13 +41,6 @@ def get_correct_action(player_cards, dealer_up_card):
         total -= 10
         ace_count -= 1
 
-    # 【サレンダー判定】最初の手札2枚、かつディーラーがA以外の時のみ
-    if len(player_cards) == 2 and dealer_up_card != 'A':
-        if ace_count == 0:
-            if total == 16 and dealer_up_card in ['9', '10', 'J', 'Q', 'K']:
-                return 'R'
-            if total == 15 and dealer_up_card in ['10', 'J', 'Q', 'K']:
-                return 'R'
 
     # 1. ペアハンド（スプリット）の判定
     if len(player_cards) == 2 and player_cards[0] == player_cards[1]:
@@ -61,7 +54,18 @@ def get_correct_action(player_cards, dealer_up_card):
         elif p_card == '4': return 'P' if 5 <= d_val <= 6 else 'H'
         elif p_card in ['2', '3']: return 'P' if d_val <= 7 else 'H'
 
-    # 2. ソフトハンドの判定
+
+    # 2.【サレンダー判定】最初の手札2枚、かつディーラーがA以外の時のみ
+    if len(player_cards) == 2 and dealer_up_card != 'A':
+        if ace_count == 0:
+            if total == 16 and dealer_up_card in ['9', '10', 'J', 'Q', 'K']:
+                return 'R'
+            if total == 15 and dealer_up_card in ['10', 'J', 'Q', 'K']:
+                return 'R'
+
+  
+
+    # 3. ソフトハンドの判定
     if ace_count > 0 and total <= 21:
         other_total = total - 11
         if other_total >= 8: return 'S'
@@ -75,7 +79,7 @@ def get_correct_action(player_cards, dealer_up_card):
         elif other_total in [2, 3]:
             return 'D' if (5 <= d_val <= 6 and len(player_cards) == 2) else 'H'
 
-    # 3. ハードハンドの判定
+    # 4. ハードハンドの判定
     if total >= 17: return 'S'
     elif total in [13, 14, 15, 16]: return 'S' if d_val <= 6 else 'H'
     elif total == 12: return 'S' if 4 <= d_val <= 6 else 'H'
