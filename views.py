@@ -2,10 +2,9 @@
 import streamlit as st
 import pandas as pd
 import time
-from config import BET_AMOUNT
 from logic import draw_card, calculate_total, get_correct_action
 
-def run_blackjack_simulation(num_games):
+def run_blackjack_simulation(num_games, bet_amount):
     """指定された回数分、ベーシックストラテジーで自動プレイして収支推移を返す"""
     profit_history = [0]
     current_profit = 0
@@ -20,7 +19,7 @@ def run_blackjack_simulation(num_games):
         is_dealer_bj = (len(dealer_hand) == 2 and d_total_init == 21)
         
         player_hands = [[draw_card(), draw_card()]]
-        hand_bets = [BET_AMOUNT]
+        hand_bets = [bet_amount]
         is_surrendered = [False]
         is_ace_split_hand = [False]
         split_count = 0
@@ -111,7 +110,7 @@ def run_blackjack_simulation(num_games):
         profit_history.append(current_profit)
     return profit_history, wins, losses, draws, total_bet_money
 
-def run_counting_practice_loop(speed_seconds):
+def run_counting_practice_loop(speed_seconds, bet_amount):
     """10ゲーム分の自動プレイを時間差で実行し、画面を動的に更新する"""
     status_area = st.empty()
     dealer_area = st.empty()
@@ -235,7 +234,7 @@ def run_counting_practice_loop(speed_seconds):
     action_area.empty()
     return all_seen_cards
 
-def render_simulation_page():
+def render_simulation_page(bet_amount):
     """高速自動シミュレーション画面の描画"""
     st.header("期待値検証・高速全自動プレイ")
     st.write("ベーシックストラテジーに100%従って、AIが指定回数分ノンストップで自動プレイします。")
@@ -248,7 +247,7 @@ def render_simulation_page():
     
     if st.button("シミュレーションを開始", type="primary", use_container_width=True):
         with st.spinner("シミュレーション中..."):
-            history, w, l, d, total_bet = run_blackjack_simulation(sim_games)
+            history, w, l, d, total_bet = run_blackjack_simulation(sim_games,bet_amount)
             
         final_profit = history[-1]
         payout_rate = ((total_bet + final_profit) / total_bet) * 100
@@ -259,14 +258,14 @@ def render_simulation_page():
         with col2: st.metric("実際の回収率 (RTP)", f"{payout_rate:.2f} %")
         with col3: st.metric("理論期待値との差", f"{payout_rate - 99.50:+.2f} %")
             
-        st.text(f"勝敗内訳: {w}勝 / {l}敗 / {d}引き分け (総ベット額: {total_bet:,}円、基本ベット額: {BET_AMOUNT:,}円)")
+        st.text(f"勝敗内訳: {w}勝 / {l}敗 / {d}引き分け (総ベット額: {total_bet:,}円、基本ベット額: {bet_amount:,}円)")
         
         
         
         chart_data = pd.DataFrame({"ゲーム回数": list(range(len(history))), "通算収支（円）": history}).set_index("ゲーム回数")
         st.line_chart(chart_data)
 
-def render_counting_page():
+def render_counting_page(bet_amount):
     """カウンティング特訓画面の描画"""
     st.header("カウンティング実戦特訓（バックカウンティング）")
     st.write("AIがストラテジー通りに自動プレイする様子をじっくり観察し、場に出たすべてのカードからランニングカウントを暗算してください。")
@@ -286,7 +285,7 @@ def render_counting_page():
             st.rerun()
 
     if st.session_state.counting_active:
-        cards_log = run_counting_practice_loop(current_speed)
+        cards_log = run_counting_practice_loop(current_speed, bet_amount)
         st.session_state.counting_cards = cards_log
         st.session_state.counting_active = False
         st.rerun()
