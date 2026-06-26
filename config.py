@@ -1,7 +1,7 @@
 # config.py
 
 # 基本ベット額
-BET_AMOUNT = 3500
+DEFAULT_BET_AMOUNT = 1000
 
 # カードの文字から数値へのマッピング
 CARD_VALUES = {
